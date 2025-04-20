@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using SteamWorkshopStats.Models;
+using SteamWorkshopStats.Models.Records;
 using SteamWorkshopStats.Services;
 
 namespace SteamWorkshopStats.Controllers;
@@ -58,14 +59,14 @@ public class UserController : ControllerBase
 	/// <returns>An User</returns>
 	private async Task<ActionResult<User>> GetUserAsync(string steamId)
 	{
-		var profileInfo = await _steamService.GetProfileInfoAsync(steamId);
+		GetPlayerSummariesPlayer? profileInfo = await _steamService.GetProfileInfoAsync(steamId);
 
 		if (profileInfo is null)
 			return NotFound(new { Message = "This User doesn't exists (Profile info not found)" });
 
-		var addons = await _steamService.GetAddonsAsync(steamId);
+		List<Addon> addons = await _steamService.GetAddonsAsync(steamId);
 
-		var user = new User
+		User user = new User
 		{
 			SteamId = steamId,
 			Username = profileInfo.Username,
@@ -75,7 +76,7 @@ public class UserController : ControllerBase
 			Favorites = addons.Sum(addon => addon.Favorites),
 			Likes = addons.Sum(addon => addon.Likes),
 			Dislikes = addons.Sum(addon => addon.Dislikes),
-			Addons = addons
+			Addons = addons,
 		};
 
 		if (_env.IsProduction())

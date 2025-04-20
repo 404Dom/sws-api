@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using SteamWorkshopStats.Middlewares;
 using SteamWorkshopStats.Services;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Services
 builder.Services.AddRateLimiter(rateLimiterOptions =>
@@ -49,7 +49,7 @@ builder.Services.AddHttpClient(
 builder.Services.AddSingleton<ISteamService, SteamService>();
 builder.Services.AddSingleton<IDiscordService, DiscordService>();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // Middlewares
 if (app.Environment.IsDevelopment())

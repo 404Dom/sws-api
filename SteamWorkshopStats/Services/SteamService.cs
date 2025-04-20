@@ -24,16 +24,16 @@ public class SteamService : ISteamService
 	/// <exception cref="SteamServiceException"></exception>
 	public async Task<string?> GetSteamIdAsync(string profileId)
 	{
-		var client = _httpClientFactory.CreateClient("SteamClient");
+		HttpClient client = _httpClientFactory.CreateClient("SteamClient");
 
-		var response = await client.GetAsync(
+		HttpResponseMessage response = await client.GetAsync(
 			$"ISteamUser/ResolveVanityURL/v1/?key={_configuration["SteamApiKey"]}&vanityurl={profileId}"
 		);
 
 		if (!response.IsSuccessStatusCode)
 			throw new SteamServiceException("Steam API failed to fetch SteamID");
 
-		var responseData = await response.Content.ReadFromJsonAsync<ResolveVanityUrl>();
+		ResolveVanityUrl? responseData = await response.Content.ReadFromJsonAsync<ResolveVanityUrl>();
 
 		if (responseData is null || responseData.Response.Success != 1)
 			return null;
@@ -49,16 +49,16 @@ public class SteamService : ISteamService
 	/// <exception cref="SteamServiceException"></exception>
 	public async Task<GetPlayerSummariesPlayer?> GetProfileInfoAsync(string steamId)
 	{
-		var client = _httpClientFactory.CreateClient("SteamClient");
+		HttpClient client = _httpClientFactory.CreateClient("SteamClient");
 
-		var response = await client.GetAsync(
+		HttpResponseMessage response = await client.GetAsync(
 			$"ISteamUser/GetPlayerSummaries/v2/?key={_configuration["SteamApiKey"]}&steamids={steamId}"
 		);
 
 		if (!response.IsSuccessStatusCode)
 			throw new SteamServiceException("Steam API failed to fetch Profile Info");
 
-		var responseData = await response.Content.ReadFromJsonAsync<GetPlayerSummaries>();
+		GetPlayerSummaries? responseData = await response.Content.ReadFromJsonAsync<GetPlayerSummaries>();
 
 		if (responseData is null || responseData.Response.Players.Count == 0)
 			return null;
@@ -74,23 +74,23 @@ public class SteamService : ISteamService
 	/// <exception cref="SteamServiceException"></exception>
 	public async Task<List<Addon>> GetAddonsAsync(string steamId)
 	{
-		var client = _httpClientFactory.CreateClient("SteamClient");
+		HttpClient client = _httpClientFactory.CreateClient("SteamClient");
 
-		var response = await client.GetAsync(
+		HttpResponseMessage response = await client.GetAsync(
 			$"IPublishedFileService/GetUserFiles/v1/?key={_configuration["SteamApiKey"]}&steamid={steamId}&numperpage=500&return_vote_data=true"
 		);
 
 		if (!response.IsSuccessStatusCode)
 			throw new SteamServiceException("Steam API failed to fetch Addons");
 
-		var responseData = await response.Content.ReadFromJsonAsync<GetUserFiles>();
+		GetUserFiles? responseData = await response.Content.ReadFromJsonAsync<GetUserFiles>();
 
 		if (responseData is null || responseData.Response.PublishedFiles is null)
 			return new List<Addon>();
 
 		List<Addon> addons = new List<Addon>();
 
-		foreach (var addon in responseData.Response.PublishedFiles)
+		foreach (PublishedFile addon in responseData.Response.PublishedFiles)
 		{
 			int likes = addon.Votes.Likes ?? 0;
 			int dislikes = addon.Votes.Dislikes ?? 0;

@@ -24,7 +24,7 @@ public class DiscordService : IDiscordService
 	/// <returns></returns>
 	public async Task LogQueryAsync(string path, string ip)
 	{
-		var client = _httpClientFactory.CreateClient("DiscordClient");
+		HttpClient client = _httpClientFactory.CreateClient("DiscordClient");
 
 		var payload = new
 		{
@@ -55,9 +55,9 @@ public class DiscordService : IDiscordService
 			}
 		};
 
-		var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+		StringContent content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
-		var response = await client.PostAsync(_configuration["DiscordLogQueryWebhook"], content);
+		HttpResponseMessage response = await client.PostAsync(_configuration["DiscordLogQueryWebhook"], content);
 
 		if (!response.IsSuccessStatusCode)
 			_ = LogErrorAsync(path, ip, "Discord Service LogQueryAsync failed");
@@ -70,7 +70,7 @@ public class DiscordService : IDiscordService
 	/// <returns></returns>
 	public async Task LogUserAsync(User user)
 	{
-		var client = _httpClientFactory.CreateClient("DiscordClient");
+		HttpClient client = _httpClientFactory.CreateClient("DiscordClient");
 
 		var payload = new
 		{
@@ -120,9 +120,9 @@ public class DiscordService : IDiscordService
 			}
 		};
 
-		var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+		StringContent content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
-		var response = await client.PostAsync(_configuration["DiscordLogUserWebhook"], content);
+		HttpResponseMessage response = await client.PostAsync(_configuration["DiscordLogUserWebhook"], content);
 
 		if (!response.IsSuccessStatusCode)
 			_ = LogErrorAsync("Unknown", "Unknown", "Discord Service LogUserAsync failed");
@@ -137,7 +137,7 @@ public class DiscordService : IDiscordService
 	/// <returns></returns>
 	public async Task LogErrorAsync(string path, string ip, string message)
 	{
-		var client = _httpClientFactory.CreateClient("DiscordClient");
+		HttpClient client = _httpClientFactory.CreateClient("DiscordClient");
 
 		var payload = new
 		{
@@ -174,9 +174,9 @@ public class DiscordService : IDiscordService
 			}
 		};
 
-		var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+		StringContent content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
-		var response = await client.PostAsync(_configuration["DiscordLogErrorWebhook"], content);
+		HttpResponseMessage response = await client.PostAsync(_configuration["DiscordLogErrorWebhook"], content);
 
 		if (!response.IsSuccessStatusCode)
 			throw new Exception("Discord Service LogErrorAsync failed");
