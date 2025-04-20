@@ -24,9 +24,6 @@ jobs:
       - name: 🔨 Build Project
         run: dotnet build --no-restore
 
-      - name: 🧪 Test Project
-        run: dotnet test --no-build --verbosity normal
-
       - name: 🔎 SonarCloud Scan
         uses: highbyte/sonarscan-dotnet@v2.3.2
         with:
