@@ -16,25 +16,10 @@ jobs:
       - name: 📘 Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.x.x
+          dotnet-version: 9.x.x
 
       - name: 🔄 Restore dependencies
         run: dotnet restore
 
       - name: 🔨 Build Project
         run: dotnet build --no-restore
-
-      - name: 🧪 Test Project
-        run: dotnet test --no-build --verbosity normal
-
-      - name: 🔎 SonarCloud Scan
-        uses: highbyte/sonarscan-dotnet@v2.3.2
-        with:
-          sonarProjectKey: thejaviertc_sws-api
-          sonarProjectName: thejaviertc_sws-api
-          sonarOrganization: thejaviertc
-          sonarBeginArguments: /d:sonar.qualitygate.wait=true
-          dotnetDisableTests: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

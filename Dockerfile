@@ -1,21 +1,21 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
 USER app
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG configuration=Release
 WORKDIR /src
-COPY src/SteamWorkshopStats.csproj src/
-RUN dotnet restore "src/SteamWorkshopStats.csproj"
+COPY SteamWorkshopStats/SteamWorkshopStats.csproj SteamWorkshopStats/
+RUN dotnet restore "SteamWorkshopStats/SteamWorkshopStats.csproj"
 COPY . .
 WORKDIR "/src"
-RUN dotnet build "src/SteamWorkshopStats.csproj" -c "$configuration" -o /app/build
+RUN dotnet build "SteamWorkshopStats/SteamWorkshopStats.csproj" -c "$configuration" -o /app/build
 
 FROM build AS publish
 ARG configuration=Release
-RUN dotnet publish "src/SteamWorkshopStats.csproj" -c "$configuration" -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "SteamWorkshopStats/SteamWorkshopStats.csproj" -c "$configuration" -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
