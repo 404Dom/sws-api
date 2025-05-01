@@ -1,4 +1,5 @@
-﻿using SteamWorkshopStats.Exceptions;
+﻿using NLog;
+using SteamWorkshopStats.Exceptions;
 using SteamWorkshopStats.Models;
 using SteamWorkshopStats.Models.Records;
 
@@ -9,6 +10,8 @@ public class SteamService : ISteamService
 	private readonly IConfiguration _configuration;
 
 	private readonly IHttpClientFactory _httpClientFactory;
+
+	private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 	public SteamService(IConfiguration configuration, IHttpClientFactory httpClientFactory)
 	{
@@ -31,12 +34,20 @@ public class SteamService : ISteamService
 		);
 
 		if (!response.IsSuccessStatusCode)
+		{
+			_logger.Error(response);
+
 			throw new SteamServiceException("Steam API failed to fetch SteamID");
+		}
 
 		ResolveVanityUrl? responseData = await response.Content.ReadFromJsonAsync<ResolveVanityUrl>();
 
 		if (responseData is null || responseData.Response.Success != 1)
+		{
+			_logger.Warn($"GetSteamIdAsync API Response {responseData?.Response.Success}");
+
 			return null;
+		}
 
 		return responseData.Response.SteamId;
 	}
@@ -56,7 +67,11 @@ public class SteamService : ISteamService
 		);
 
 		if (!response.IsSuccessStatusCode)
+		{
+			_logger.Error(response);
+
 			throw new SteamServiceException("Steam API failed to fetch Profile Info");
+		}
 
 		GetPlayerSummaries? responseData = await response.Content.ReadFromJsonAsync<GetPlayerSummaries>();
 
@@ -81,7 +96,11 @@ public class SteamService : ISteamService
 		);
 
 		if (!response.IsSuccessStatusCode)
+		{
+			_logger.Error(response);
+
 			throw new SteamServiceException("Steam API failed to fetch Addons");
+		}
 
 		GetUserFiles? responseData = await response.Content.ReadFromJsonAsync<GetUserFiles>();
 
@@ -106,7 +125,7 @@ public class SteamService : ISteamService
 					Favorites = addon.Favorites,
 					Likes = likes,
 					Dislikes = dislikes,
-					Stars = Addon.GetNumberOfStars(likes + dislikes, addon.Votes.Score)
+					Stars = Addon.GetNumberOfStars(likes + dislikes, addon.Votes.Score),
 				}
 			);
 		}

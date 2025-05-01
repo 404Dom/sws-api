@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
+using NLog;
 using SteamWorkshopStats.Models;
 
 namespace SteamWorkshopStats.Services;
@@ -9,6 +10,8 @@ public class DiscordService : IDiscordService
 	private readonly IConfiguration _configuration;
 
 	private readonly IHttpClientFactory _httpClientFactory;
+
+	private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 	public DiscordService(IConfiguration configuration, IHttpClientFactory httpClientFactory)
 	{
@@ -41,18 +44,18 @@ public class DiscordService : IDiscordService
 						{
 							name = "Path",
 							value = path,
-							inline = false
+							inline = false,
 						},
 						new
 						{
 							name = "IP",
 							value = ip,
-							inline = true
+							inline = true,
 						},
 					},
-					timestamp = DateTime.UtcNow
-				}
-			}
+					timestamp = DateTime.UtcNow,
+				},
+			},
 		};
 
 		StringContent content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
@@ -60,7 +63,10 @@ public class DiscordService : IDiscordService
 		HttpResponseMessage response = await client.PostAsync(_configuration["DiscordLogQueryWebhook"], content);
 
 		if (!response.IsSuccessStatusCode)
-			_ = LogErrorAsync(path, ip, "Discord Service LogQueryAsync failed");
+		{
+			_logger.Error(response);
+			_ = LogErrorAsync(path, ip, $"Discord Service LogQueryAsync failed: {response.StatusCode}");
+		}
 	}
 
 	/// <summary>
@@ -87,37 +93,37 @@ public class DiscordService : IDiscordService
 						{
 							name = "Views",
 							value = user.Views,
-							inline = true
+							inline = true,
 						},
 						new
 						{
 							name = "Subscribers",
 							value = user.Subscribers,
-							inline = true
+							inline = true,
 						},
 						new
 						{
 							name = "Favorites",
 							value = user.Favorites,
-							inline = true
+							inline = true,
 						},
 						new
 						{
 							name = "Likes",
 							value = user.Likes,
-							inline = true
+							inline = true,
 						},
 						new
 						{
 							name = "Dislikes",
 							value = user.Dislikes,
-							inline = true
-						}
+							inline = true,
+						},
 					},
 					thumbnail = new { url = user.ProfileImageUrl },
-					timestamp = DateTime.UtcNow
-				}
-			}
+					timestamp = DateTime.UtcNow,
+				},
+			},
 		};
 
 		StringContent content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
@@ -125,7 +131,10 @@ public class DiscordService : IDiscordService
 		HttpResponseMessage response = await client.PostAsync(_configuration["DiscordLogUserWebhook"], content);
 
 		if (!response.IsSuccessStatusCode)
-			_ = LogErrorAsync("Unknown", "Unknown", "Discord Service LogUserAsync failed");
+		{
+			_logger.Error(response);
+			_ = LogErrorAsync("Unknown", "Unknown", $"Discord Service LogUserAsync failed: {response.StatusCode}");
+		}
 	}
 
 	/// <summary>
@@ -154,24 +163,24 @@ public class DiscordService : IDiscordService
 						{
 							name = "Path",
 							value = path,
-							inline = true
+							inline = true,
 						},
 						new
 						{
 							name = "IP",
 							value = ip,
-							inline = true
+							inline = true,
 						},
 						new
 						{
 							name = "Error Message",
 							value = message,
-							inline = false
+							inline = false,
 						},
 					},
-					timestamp = DateTime.UtcNow
-				}
-			}
+					timestamp = DateTime.UtcNow,
+				},
+			},
 		};
 
 		StringContent content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
@@ -179,6 +188,10 @@ public class DiscordService : IDiscordService
 		HttpResponseMessage response = await client.PostAsync(_configuration["DiscordLogErrorWebhook"], content);
 
 		if (!response.IsSuccessStatusCode)
+		{
+			_logger.Error(response);
+
 			throw new Exception("Discord Service LogErrorAsync failed");
+		}
 	}
 }

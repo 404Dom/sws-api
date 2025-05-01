@@ -80,9 +80,7 @@ public class UserController : ControllerBase
 		};
 
 		if (_env.IsProduction())
-		{
 			_ = _discordService.LogUserAsync(user);
-		}
 
 		return user;
 	}
